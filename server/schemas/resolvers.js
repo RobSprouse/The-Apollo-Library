@@ -3,19 +3,18 @@ const { signToken } = require("../utils/auth");
 
 const resolvers = {
      Query: {
-          getSingleUser: async (parent, { _id, username }, context) => {
-               const user = context.user;
-               const foundUser = await User.findOne({
-                    $or: [{ _id: user ? user._id : _id }, { username: username }],
-               });
-               if (!foundUser) {
-                    throw new Error("Cannot find a user with this id!");
+          me: async (_, _, context) => {
+               if (context.user) {
+                    const userData = await User.findOne({ _id: context.user._id })
+                         .select("-__v -password")
+                         .populate("savedBooks");
+                    return userData;
                }
-               return foundUser;
+               throw new Error("Not logged in!");
           },
      },
      Mutation: {
-          createUser: async (_, { username, email, password }) => {
+          addUser: async (_, { username, email, password }) => {
                const user = await User.create({ username, email, password });
                if (!user) {
                     throw new Error("A problem occurred while creating the user.");
@@ -35,12 +34,11 @@ const resolvers = {
                const token = signToken(user);
                return { token, user };
           },
-          saveBook: async (_, { authors, description, bookId, image, link, title }, context) => {
+          saveBook: async (_, { input }, context) => {
                try {
-                    const book = { authors, description, bookId, image, link, title };
                     const updatedUser = await User.findOneAndUpdate(
                          { _id: context.user._id },
-                         { $addToSet: { savedBooks: book } },
+                         { $addToSet: { savedBooks: input } },
                          { new: true, runValidators: true }
                     );
                     return updatedUser;
@@ -49,7 +47,7 @@ const resolvers = {
                     throw new Error(err);
                }
           },
-          deleteBook: async (_, { bookId }, context) => {
+          removeBook: async (_, { bookId }, context) => {
                const updatedUser = await User.findOneAndUpdate(
                     { _id: context.user._id },
                     { $pull: { savedBooks: { bookId: bookId } } },
