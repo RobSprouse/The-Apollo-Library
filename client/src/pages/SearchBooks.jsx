@@ -23,10 +23,13 @@ const SearchBooks = () => {
            }); */
      const [saveBook, { error }] = useMutation(SAVE_BOOK);
      const { loading, data } = useQuery(GET_ME);
-     let userSavedBooks = [];
-     if (data) {
-          userSavedBooks = data.me.savedBooks.map((book) => book.bookId);
-     }
+     const [userSavedBooks, setUserSavedBooks] = useState([]);
+
+     useEffect(() => {
+          if (data) {
+               setUserSavedBooks(data.me.savedBooks.map((book) => book.bookId));
+          }
+     }, [data]);
 
      // create method to search for books and set state on form submit
      const handleFormSubmit = async (event) => {
