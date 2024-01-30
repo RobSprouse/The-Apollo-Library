@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Container, Col, Form, Button, Card, Row } from "react-bootstrap";
-
+import { useMutation, useQuery } from "@apollo/client";
 import Auth from "../utils/auth";
-import { saveBook, searchGoogleBooks } from "../utils/API";
-import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
+import { searchGoogleBooks } from "../utils/API"; // COMMENT: removed the import of saveBook from the API file // TODO: remove the api's not being used because of the mutations and queries
+import { SAVE_BOOK } from "../utils/mutations";
+import { GET_ME } from "../utils/queries";
 
 const SearchBooks = () => {
      // create state for holding returned google api data
@@ -12,13 +13,20 @@ const SearchBooks = () => {
      const [searchInput, setSearchInput] = useState("");
 
      // create state to hold saved bookId values
-     const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
-
-     // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
-     // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
-     useEffect(() => {
-          return () => saveBookIds(savedBookIds);
-     });
+     /* COMMENT: removed for refactoring to use the useMutation hook
+           const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+      
+           // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
+           // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
+           useEffect(() => {
+                return () => saveBookIds(savedBookIds);
+           }); */
+     const [saveBook, { error }] = useMutation(SAVE_BOOK);
+     const { loading, data } = useQuery(GET_ME);
+     let userSavedBooks = [];
+     if (data) {
+          userSavedBooks = data.me.savedBooks.map((book) => book.bookId);
+     }
 
      // create method to search for books and set state on form submit
      const handleFormSubmit = async (event) => {
@@ -65,14 +73,19 @@ const SearchBooks = () => {
           }
 
           try {
-               const response = await saveBook(bookToSave, token);
+               // COMMENT: refactored section to use the useMutation hook
+               const { data } = await saveBook({
+                    variables: { bookData: bookToSave },
+                    context: {
+                         headers: {
+                              authorization: `Bearer ${token}`,
+                         },
+                    },
+               });
 
-               if (!response.ok) {
-                    throw new Error("something went wrong!");
+               if (!data) {
+                    throw new Error("An error occurred while saving the book. Please try again.");
                }
-
-               // if book successfully saves to user's account, save book id to state
-               setSavedBookIds([...savedBookIds, bookToSave.bookId]);
           } catch (err) {
                console.error(err);
           }
@@ -111,43 +124,49 @@ const SearchBooks = () => {
                               ? `Viewing ${searchedBooks.length} results:`
                               : "Search for a book to begin"}
                     </h2>
-                    <Row>
-                         {searchedBooks.map((book) => {
-                              return (
-                                   <Col md="4" key={book.bookId}>
-                                        <Card border="dark">
-                                             {book.image ? (
-                                                  <Card.Img
-                                                       src={book.image}
-                                                       alt={`The cover for ${book.title}`}
-                                                       variant="top"
-                                                  />
-                                             ) : null}
-                                             <Card.Body>
-                                                  <Card.Title>{book.title}</Card.Title>
-                                                  <p className="small">Authors: {book.authors}</p>
-                                                  <Card.Text>{book.description}</Card.Text>
-                                                  {Auth.loggedIn() && (
-                                                       <Button
-                                                            disabled={savedBookIds?.some(
-                                                                 (savedBookId) => savedBookId === book.bookId
-                                                            )}
-                                                            className="btn-block btn-info"
-                                                            onClick={() => handleSaveBook(book.bookId)}
-                                                       >
-                                                            {savedBookIds?.some(
-                                                                 (savedBookId) => savedBookId === book.bookId
-                                                            )
-                                                                 ? "This book has already been saved!"
-                                                                 : "Save this Book!"}
-                                                       </Button>
-                                                  )}
-                                             </Card.Body>
-                                        </Card>
-                                   </Col>
-                              );
-                         })}
-                    </Row>
+                    {loading ? (
+                         <h2>Loading...</h2>
+                    ) : error ? (
+                         <h2>Error: {error.message}</h2>
+                    ) : (
+                         <Row>
+                              {searchedBooks.map((book) => {
+                                   return (
+                                        <Col md="4" key={book.bookId}>
+                                             <Card border="dark">
+                                                  {book.image ? (
+                                                       <Card.Img
+                                                            src={book.image}
+                                                            alt={`The cover for ${book.title}`}
+                                                            variant="top"
+                                                       />
+                                                  ) : null}
+                                                  <Card.Body>
+                                                       <Card.Title>{book.title}</Card.Title>
+                                                       <p className="small">Authors: {book.authors}</p>
+                                                       <Card.Text>{book.description}</Card.Text>
+                                                       {Auth.loggedIn() && (
+                                                            <Button
+                                                                 disabled={userSavedBooks?.some(
+                                                                      (savedBookId) => savedBookId === book.bookId
+                                                                 )}
+                                                                 className="btn-block btn-info"
+                                                                 onClick={() => handleSaveBook(book.bookId)}
+                                                            >
+                                                                 {userSavedBooks?.some(
+                                                                      (savedBookId) => savedBookId === book.bookId
+                                                                 )
+                                                                      ? "This book has already been saved!"
+                                                                      : "Save this Book!"}
+                                                            </Button>
+                                                       )}
+                                                  </Card.Body>
+                                             </Card>
+                                        </Col>
+                                   );
+                              })}
+                         </Row>
+                    )}
                </Container>
           </>
      );
