@@ -1,9 +1,9 @@
 const { User } = require("../models/index");
-const { signToken } = require("../utils/auth");
+const { signToken, AuthenticationError } = require("../utils/auth");
 
 const resolvers = {
      Query: {
-          me: async (_, _, context) => {
+          me: async (_, args, context) => {
                if (context.user) {
                     const userData = await User.findOne({ _id: context.user._id })
                          .select("-__v -password")
@@ -14,31 +14,37 @@ const resolvers = {
           },
      },
      Mutation: {
-          addUser: async (_, { username, email, password }) => {
+          addUser: async (parent, { username, email, password }) => {
                const user = await User.create({ username, email, password });
-               if (!user) {
-                    throw new Error("A problem occurred while creating the user.");
-               }
                const token = signToken(user);
                return { token, user };
           },
-          login: async (_, { username, email, password }) => {
-               const user = await User.findOne({ $or: [{ username }, { email }] });
+          login: async (parent, { email, password }) => {
+               const user = await User.findOne({ email });
+
                if (!user) {
-                    throw new Error("A user with this username or email was not found.");
+                    throw AuthenticationError;
                }
+
                const correctPw = await user.isCorrectPassword(password);
+
                if (!correctPw) {
-                    throw new Error("The password provided is incorrect.");
+                    throw AuthenticationError;
                }
+
                const token = signToken(user);
+               console.log("❓ ~ login: ~ token & user:", token, user);
+
                return { token, user };
           },
-          saveBook: async (_, { input }, context) => {
+          saveBook: async (_, { bookData }, context) => {
                try {
+                    if (!context.user) {
+                         throw new Error("Not authenticated");
+                    }
                     const updatedUser = await User.findOneAndUpdate(
                          { _id: context.user._id },
-                         { $addToSet: { savedBooks: input } },
+                         { $addToSet: { savedBooks: bookData } },
                          { new: true, runValidators: true }
                     );
                     return updatedUser;
@@ -60,3 +66,5 @@ const resolvers = {
           },
      },
 };
+
+module.exports = resolvers;

@@ -10,7 +10,6 @@ import { GET_ME } from "../utils/queries";
 import { REMOVE_BOOK } from "../utils/mutations";
 
 const SavedBooks = () => {
-
      const { loading, data, error } = useQuery(GET_ME);
      const userData = data?.me;
 
@@ -27,11 +26,6 @@ const SavedBooks = () => {
           try {
                const { data } = await removeBook({
                     variables: { bookId },
-                    context: {
-                         headers: {
-                              authorization: `Bearer ${token}`,
-                         },
-                    },
                });
 
                if (!data) {
