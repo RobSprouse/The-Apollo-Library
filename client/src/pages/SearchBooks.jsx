@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Container, Col, Form, Button, Card, Row } from "react-bootstrap";
-
+import { useMutation, useQuery } from "@apollo/client";
 import Auth from "../utils/auth";
-import { saveBook, searchGoogleBooks } from "../utils/API";
+import { searchGoogleBooks } from "../utils/API"; // COMMENT: removed the import of saveBook from the API file // TODO: remove the api's not being used because of the mutations and queries
+import { SAVE_BOOK } from "../utils/mutations";
+import { GET_ME } from "../utils/queries";
 import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
 
 const SearchBooks = () => {
@@ -18,7 +20,9 @@ const SearchBooks = () => {
      // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
      useEffect(() => {
           return () => saveBookIds(savedBookIds);
-     });
+     }, [savedBookIds]);
+
+     const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
      // create method to search for books and set state on form submit
      const handleFormSubmit = async (event) => {
@@ -64,17 +68,23 @@ const SearchBooks = () => {
                return false;
           }
 
+          let error;
           try {
-               const response = await saveBook(bookToSave, token);
-
-               if (!response.ok) {
-                    throw new Error("something went wrong!");
-               }
+               const { data } = await saveBook({
+                    variables: {
+                         bookData: bookToSave,
+                    },
+               });
 
                // if book successfully saves to user's account, save book id to state
                setSavedBookIds([...savedBookIds, bookToSave.bookId]);
           } catch (err) {
                console.error(err);
+               error = err;
+          }
+
+          if (error) {
+               throw new Error("something went wrong!");
           }
      };
 
