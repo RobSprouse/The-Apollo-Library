@@ -1,19 +1,19 @@
-// see SignupForm.js for comments
+// COMMENT: imports thhe required modules
 import { useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@apollo/client";
 import { LOGIN_USER } from "../utils/mutations";
-
-// import { loginUser } from "../utils/API"; // COMMENT: removed to refactor to use the mutation
 import Auth from "../utils/auth";
 
+// COMMENT: defines the LoginForm component
 const LoginForm = () => {
-     const [userFormData, setUserFormData] = useState({ email: "", password: "" });
-     const [validated] = useState(false);
-     const [showAlert, setShowAlert] = useState(false);
+     const [userFormData, setUserFormData] = useState({ email: "", password: "" }); // COMMENT: sets the initial state of the form
+     const [validated] = useState(false); // COMMENT: sets the initial state of the form validation
+     const [showAlert, setShowAlert] = useState(false); // COMMENT: sets the initial state of the alert
 
-     const [login] = useMutation(LOGIN_USER);
+     const [login] = useMutation(LOGIN_USER); // COMMENT: sets the useMutation hook to login a user
 
+     // COMMENT: sets the handleInputChange function to update the form state when the user types into the input fields
      const handleInputChange = (event) => {
           const { name, value } = event.target;
           setUserFormData({
@@ -22,6 +22,7 @@ const LoginForm = () => {
           });
      };
 
+     // COMMENT: sets the handleFormSubmit function to handle the form submission
      const handleFormSubmit = async (event) => {
           event.preventDefault();
 
@@ -33,15 +34,17 @@ const LoginForm = () => {
           }
 
           try {
+               // COMMENT: calls the login mutation and passes in the userFormData
                const response = await login({
                     variables: { ...userFormData },
                });
-               Auth.login(response.data.login.token);
+               Auth.login(response.data.login.token); // COMMENT: logs the user in and saves the token to local storage with the Auth.login method
           } catch (err) {
                console.error(err);
                setShowAlert(true);
           }
 
+          // COMMENT: resets the form state
           setUserFormData({
                email: "",
                password: "",
@@ -89,4 +92,5 @@ const LoginForm = () => {
      );
 };
 
+// COMMENT: exports the LoginForm component
 export default LoginForm;

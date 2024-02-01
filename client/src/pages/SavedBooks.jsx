@@ -1,3 +1,4 @@
+// COMMENT: imports the required modules
 import { useState, useEffect } from "react";
 import { Container, Card, Button, Row, Col } from "react-bootstrap";
 import { useMutation, useQuery } from "@apollo/client";
@@ -6,21 +7,23 @@ import { removeBookId } from "../utils/localStorage";
 import { GET_ME } from "../utils/queries";
 import { REMOVE_BOOK } from "../utils/mutations";
 
+// COMMENT: defines the SavedBooks component
 const SavedBooks = () => {
-     const { loading, data, error } = useQuery(GET_ME);
-     const userData = data?.me;
+     const { loading, data, error } = useQuery(GET_ME); // COMMENT: sets the useQuery hook to get the user's data
+     const userData = data?.me; // COMMENT: sets the userData variable to the user's data
 
-     const [removeBook, { error: mutationError }] = useMutation(REMOVE_BOOK);
+     const [removeBook, { error: mutationError }] = useMutation(REMOVE_BOOK); // COMMENT: sets the useMutation hook to remove a book
 
-     // create function that accepts the book's mongo _id value as param and deletes the book from the database
+     // COMMENT: defines the handleDeleteBook function to remove a book from the user's saved books
      const handleDeleteBook = async (bookId) => {
-          const token = Auth.loggedIn() ? Auth.getToken() : null;
+          const token = Auth.loggedIn() ? Auth.getToken() : null; // COMMENT: sets the token variable to the user's token
 
           if (!token) {
                return false;
           }
 
           try {
+               // COMMENT: calls the removeBook mutation and passes in the bookId
                const { data } = await removeBook({
                     variables: { bookId },
                });
@@ -29,24 +32,24 @@ const SavedBooks = () => {
                     throw new Error("There was an error deleting the book!");
                }
 
-               // upon success, remove book's id from localStorage
+               // COMMENT: removes the bookId from the user's saved books in local storage
                removeBookId(bookId, Auth.getUserId());
           } catch (err) {
                console.error(err);
           }
      };
 
-     // Check if the query is loading
+     // COMMENT: checks if the query is still loading
      if (loading) {
           return <h2>LOADING...</h2>;
      }
 
-     // Check if there was an error with the query
+     // COMMENT: checks if there was an error with the query
      if (error) {
           return <h2>There was an error loading your books. Please try again. Error Message: {error.message}</h2>;
      }
 
-     // Check if there was an error with the mutation
+     // COMMENT: checks if there was an error with the mutation
      if (mutationError) {
           return <h2>There was an error deleting a book. Please try again. Error Message: {mutationError.message}</h2>;
      }
@@ -99,4 +102,5 @@ const SavedBooks = () => {
      );
 };
 
+// COMMENT: exports the SavedBooks component
 export default SavedBooks;

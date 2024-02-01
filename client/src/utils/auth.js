@@ -32,6 +32,7 @@ class AuthService {
           return localStorage.getItem("id_token");
      }
 
+     // get user id from token
      getUserId() {
           const token = this.getToken();
           if (!token) {

@@ -1,9 +1,11 @@
+// COMMENT: imports the Schema constructor and model function from the mongoose library and the bcrypt library
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 
 // import schema from Book.js
 const bookSchema = require("./Book");
 
+// COMMENT: creates the User schema
 const userSchema = new Schema(
      {
           username: {
@@ -52,6 +54,8 @@ userSchema.virtual("bookCount").get(function () {
      return this.savedBooks.length;
 });
 
+// COMMENT: creates the User model using the User schema
 const User = model("User", userSchema);
 
+// COMMENT: exports the User model
 module.exports = User;

@@ -1,3 +1,4 @@
+// COMMENT: defines the typeDefs for the Apollo Server which includes the Book and User types, the Query type, and the Mutation type
 const typeDefs = `
 type Book {
      _id: ID!
@@ -43,4 +44,5 @@ type Mutation {
 }
 `;
 
+// COMMENT: exports the typeDefs
 module.exports = typeDefs;

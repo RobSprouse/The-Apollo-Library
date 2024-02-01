@@ -1,14 +1,14 @@
+// COMMENT: imports the required modules and components
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navbar, Nav, Container, Modal, Tab } from "react-bootstrap";
 import SignUpForm from "./SignupForm";
 import LoginForm from "./LoginForm";
-
 import Auth from "../utils/auth";
 
+// COMMENT: defines the AppNavbar component which contains the navigation bar and modal for login/signup
 const AppNavbar = () => {
-     // set modal display state
-     const [showModal, setShowModal] = useState(false);
+     const [showModal, setShowModal] = useState(false); // COMMENT: sets the initial state of the modal to false
 
      return (
           <>
@@ -70,4 +70,5 @@ const AppNavbar = () => {
      );
 };
 
+// COMMENT: exports the AppNavbar component
 export default AppNavbar;

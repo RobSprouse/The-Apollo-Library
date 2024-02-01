@@ -1,3 +1,5 @@
+
+// COMMENT: exports the functions to get, save, and remove book ids from local storage
 export const getSavedBookIds = (userId) => {
      const savedBookIds = localStorage.getItem(`saved_books_${userId}`)
           ? JSON.parse(localStorage.getItem(`saved_books_${userId}`))

@@ -1,3 +1,4 @@
+// COMMENT: imports the required modules
 const { GraphQLError } = require("graphql");
 const jwt = require("jsonwebtoken");
 
@@ -5,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const secret = "mysecretsshhhhh";
 const expiration = "2h";
 
+// COMMENT: exports the auth functions
 module.exports = {
      AuthenticationError: new GraphQLError("Could not authenticate user.", {
           extensions: {

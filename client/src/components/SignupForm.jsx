@@ -1,27 +1,29 @@
+// COMMENT: imports the required modules
 import { useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@apollo/client";
 import { ADD_USER } from "../utils/mutations";
-
-// import { createUser } from "../utils/API"; // COMMENT: removed to refactor to use the mutation
 import Auth from "../utils/auth";
 
+// COMMENT: defines the SignupForm component
 const SignupForm = () => {
      // set initial form state
-     const [userFormData, setUserFormData] = useState({ username: "", email: "", password: "" });
+     const [userFormData, setUserFormData] = useState({ username: "", email: "", password: "" }); // COMMENT: sets the initial state of the form
      // set state for form validation
-     const [validated] = useState(false);
+     const [validated] = useState(false); // COMMENT: sets the initial state of the form validation
      // set state for alert
-     const [showAlert, setShowAlert] = useState(false);
-     const [errorMessage, setErrorMessage] = useState("");
+     const [showAlert, setShowAlert] = useState(false); // COMMENT: sets the initial state of the alert
+     const [errorMessage, setErrorMessage] = useState(""); // COMMENT: sets the initial state of the error message
 
+     // COMMENT: sets the handleInputChange function to update the form state when the user types into the input fields
      const handleInputChange = (event) => {
           const { name, value } = event.target;
           setUserFormData({ ...userFormData, [name]: value });
      };
 
-     const [addUser] = useMutation(ADD_USER);
+     const [addUser] = useMutation(ADD_USER); // COMMENT: sets the useMutation hook to add a user
 
+     // COMMENT: sets the handleFormSubmit function to handle the form submission
      const handleFormSubmit = async (event) => {
           event.preventDefault();
 
@@ -33,10 +35,11 @@ const SignupForm = () => {
           }
 
           try {
+               // COMMENT: calls the addUser mutation and passes in the userFormData
                const { data } = await addUser({
                     variables: { ...userFormData },
                });
-               Auth.login(data.addUser.token);
+               Auth.login(data.addUser.token); // COMMENT: logs the user in and saves the token to local storage with the Auth.login method
           } catch (err) {
                console.error(err);
                setShowAlert(true);
@@ -49,6 +52,7 @@ const SignupForm = () => {
                );
           }
 
+          // COMMENT: resets the form state
           setUserFormData({
                username: "",
                email: "",
@@ -126,4 +130,5 @@ const SignupForm = () => {
      );
 };
 
+// COMMENT: exports the SignupForm component
 export default SignupForm;

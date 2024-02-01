@@ -1,26 +1,24 @@
+// COMMENT: imports the required modules
 import { useState, useEffect } from "react";
 import { Container, Col, Form, Button, Card, Row } from "react-bootstrap";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import Auth from "../utils/auth";
 import { SAVE_BOOK } from "../utils/mutations";
-import { GET_ME } from "../utils/queries";
 import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
 
+// COMMENT: defines the serachGoogleBooks function to search for books using the Google Books API
 const searchGoogleBooks = (query) => {
      return fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`);
 };
 
+// COMMENT: defines the SearchBooks component
 const SearchBooks = () => {
-     // create state for holding returned google api data
-     const [searchedBooks, setSearchedBooks] = useState([]);
-     // create state for holding our search field data
-     const [searchInput, setSearchInput] = useState("");
+     const [searchedBooks, setSearchedBooks] = useState([]); // COMMENT: sets the initial state of the searchedBooks
+     const [searchInput, setSearchInput] = useState(""); // COMMENT: sets the initial state of the searchInput
+     const [savedBookIds, setSavedBookIds] = useState([]); // COMMENT: sets the initial state of the savedBookIds
 
-     // create state to hold saved bookId values
-     const [savedBookIds, setSavedBookIds] = useState([]);
-
+     // COMMENT: if the user is logged in, get the user's saved books from local storage and set the savedBookIds state, used to load the saved book IDs from local storage when the component mounts
      useEffect(() => {
-          // check if user is logged in
           if (Auth.loggedIn()) {
                const userId = Auth.getUserId();
                if (userId) {
@@ -41,9 +39,10 @@ const SearchBooks = () => {
           }
      }, [savedBookIds]);
 
-     const [saveBook, { error }] = useMutation(SAVE_BOOK);
+     // COMMENT: sets the useMutation hook to save a book
+     const [saveBook] = useMutation(SAVE_BOOK);
 
-     // create method to search for books and set state on form submit
+     // COMMENT: defines the handleFormSubmit function to handle the form submission
      const handleFormSubmit = async (event) => {
           event.preventDefault();
 
@@ -52,14 +51,15 @@ const SearchBooks = () => {
           }
 
           try {
-               const response = await searchGoogleBooks(searchInput);
+               const response = await searchGoogleBooks(searchInput); // COMMENT: calls the searchGoogleBooks function and passes in the searchInput
 
                if (!response.ok) {
                     throw new Error("something went wrong!");
                }
 
-               const { items } = await response.json();
+               const { items } = await response.json(); // COMMENT: sets the items variable to the response data
 
+               // COMMENT: maps over the items and returns the book data with or without what's required by the database
                const allBookData = items.map((book) => ({
                     bookId: book.id,
                     authors: book.volumeInfo.authors || ["No author to display"],
@@ -67,24 +67,21 @@ const SearchBooks = () => {
                     description: book.volumeInfo.description,
                     image: book.volumeInfo.imageLinks?.thumbnail || "",
                }));
-               
-               // COMMENT: filtering out books that don't have a bookId, title, or description which are required for saving to the database
-               const bookData = allBookData.filter((book) => book.bookId && book.title && book.description);
 
-               setSearchedBooks(bookData);
-               setSearchInput("");
+               const bookData = allBookData.filter((book) => book.bookId && book.title && book.description); // COMMENT: filtering out books that don't have a bookId, title, or description which are required for saving to the database
+
+               setSearchedBooks(bookData); // COMMENT: sets the searchedBooks state to the bookData
+               setSearchInput(""); // COMMENT: resets the searchInput state
           } catch (err) {
                console.error(err);
           }
      };
 
-     // create function to handle saving a book to our database
+     // COMMENT: function to handle saving a book to our database
      const handleSaveBook = async (bookId) => {
-          // find the book in `searchedBooks` state by the matching id
-          const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+          const bookToSave = searchedBooks.find((book) => book.bookId === bookId); // COMMENT: // find the book in `searchedBooks` state by the matching id
 
-          // get token
-          const token = Auth.loggedIn() ? Auth.getToken() : null;
+          const token = Auth.loggedIn() ? Auth.getToken() : null; // COMMENT:
 
           if (!token) {
                return false;
@@ -92,14 +89,14 @@ const SearchBooks = () => {
 
           let error;
           try {
+               // COMMENT: calls the saveBook mutation and passes in the bookToSave
                const { data } = await saveBook({
                     variables: {
                          bookData: bookToSave,
                     },
                });
 
-               // if book successfully saves to user's account, save book id to state
-               setSavedBookIds((prevSavedBookIds) => [...prevSavedBookIds, bookToSave.bookId]);
+               setSavedBookIds((prevSavedBookIds) => [...prevSavedBookIds, bookToSave.bookId]); // COMMENT: if book successfully saves to user's account, save book id to state
           } catch (err) {
                console.error(err);
                error = err;
@@ -185,4 +182,5 @@ const SearchBooks = () => {
      );
 };
 
+// COMMENT: exports the SearchBooks component
 export default SearchBooks;

@@ -1,14 +1,14 @@
+// COMMENT: imports the required modules
 const express = require("express");
 const path = require("path");
 const db = require("./config/connection");
-// const routes = require('./routes');
-// Import the ApolloServer Class
 const { ApolloServer } = require("apollo-server-express");
 const { authMiddleware } = require("./utils/auth");
-// Import the two parts of a GraphQL schema
 const { typeDefs, resolvers } = require("./schemas");
 
+// COMMENT: creates a new express server
 const app = express();
+// COMMENT: sets the port for the server
 const PORT = process.env.PORT || 3001;
 // Create a new instance of an Apollo server with the GraphQL schema
 const server = new ApolloServer({
@@ -22,6 +22,7 @@ const server = new ApolloServer({
      },
 });
 
+// COMMENT: sets up the middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
