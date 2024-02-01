@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { Container, Card, Button, Row, Col } from "react-bootstrap";
 import { useMutation, useQuery } from "@apollo/client";
-
-//import { getMe, deleteBook } from "../utils/API"; // COMMENT: removed for refactoring to use the useMutation hook and the queries
-
 import Auth from "../utils/auth";
 import { removeBookId } from "../utils/localStorage";
 import { GET_ME } from "../utils/queries";

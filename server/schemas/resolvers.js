@@ -33,7 +33,6 @@ const resolvers = {
                }
 
                const token = signToken(user);
-               console.log("❓ ~ login: ~ token & user:", token, user);
 
                return { token, user };
           },

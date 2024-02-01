@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { Container, Col, Form, Button, Card, Row } from "react-bootstrap";
 import { useMutation, useQuery } from "@apollo/client";
 import Auth from "../utils/auth";
-import { searchGoogleBooks } from "../utils/API"; // COMMENT: removed the import of saveBook from the API file // TODO: remove the api's not being used because of the mutations and queries
 import { SAVE_BOOK } from "../utils/mutations";
 import { GET_ME } from "../utils/queries";
 import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
+
+const searchGoogleBooks = (query) => {
+     return fetch(`https://www.googleapis.com/books/v1/volumes?q=${query}`);
+};
 
 const SearchBooks = () => {
      // create state for holding returned google api data
