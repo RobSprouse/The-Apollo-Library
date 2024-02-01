@@ -13,13 +13,14 @@ const SignupForm = () => {
      const [validated] = useState(false);
      // set state for alert
      const [showAlert, setShowAlert] = useState(false);
+     const [errorMessage, setErrorMessage] = useState("");
 
      const handleInputChange = (event) => {
           const { name, value } = event.target;
           setUserFormData({ ...userFormData, [name]: value });
      };
 
-     const [addUser, { error }] = useMutation(ADD_USER);
+     const [addUser] = useMutation(ADD_USER);
 
      const handleFormSubmit = async (event) => {
           event.preventDefault();
@@ -39,6 +40,13 @@ const SignupForm = () => {
           } catch (err) {
                console.error(err);
                setShowAlert(true);
+               setErrorMessage(
+                    err.message.includes("E11000 duplicate key error")
+                         ? "A user with this username or email already exists."
+                         : err.message.includes("User validation failed")
+                         ? "Please enter a valid email address."
+                         : err.message
+               );
           }
 
           setUserFormData({
@@ -53,8 +61,16 @@ const SignupForm = () => {
                {/* This is needed for the validation functionality above */}
                <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
                     {/* show alert if server response is bad */}
-                    <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant="danger">
-                         Something went wrong with your signup!
+                    <Alert
+                         dismissible
+                         onClose={() => {
+                              setShowAlert(false);
+                              setErrorMessage("");
+                         }}
+                         show={showAlert}
+                         variant="danger"
+                    >
+                         {errorMessage}
                     </Alert>
 
                     <Form.Group className="mb-3">
@@ -66,6 +82,7 @@ const SignupForm = () => {
                               onChange={handleInputChange}
                               value={userFormData.username}
                               required
+                              autoComplete="username"
                          />
                          <Form.Control.Feedback type="invalid">Username is required!</Form.Control.Feedback>
                     </Form.Group>
@@ -79,6 +96,7 @@ const SignupForm = () => {
                               onChange={handleInputChange}
                               value={userFormData.email}
                               required
+                              autoComplete="email"
                          />
                          <Form.Control.Feedback type="invalid">Email is required!</Form.Control.Feedback>
                     </Form.Group>
@@ -92,6 +110,7 @@ const SignupForm = () => {
                               onChange={handleInputChange}
                               value={userFormData.password}
                               required
+                              autoComplete="new-password"
                          />
                          <Form.Control.Feedback type="invalid">Password is required!</Form.Control.Feedback>
                     </Form.Group>

@@ -60,13 +60,16 @@ const SearchBooks = () => {
 
                const { items } = await response.json();
 
-               const bookData = items.map((book) => ({
+               const allBookData = items.map((book) => ({
                     bookId: book.id,
                     authors: book.volumeInfo.authors || ["No author to display"],
                     title: book.volumeInfo.title,
                     description: book.volumeInfo.description,
                     image: book.volumeInfo.imageLinks?.thumbnail || "",
                }));
+               
+               // COMMENT: filtering out books that don't have a bookId, title, or description which are required for saving to the database
+               const bookData = allBookData.filter((book) => book.bookId && book.title && book.description);
 
                setSearchedBooks(bookData);
                setSearchInput("");
