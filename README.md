@@ -4,6 +4,8 @@
 
 This repository was created as a part of the University of Richmond's Bootcamp, Module 21 Challenge. This challenge was to start with a fully functioning Google Books API search engine built with a RESTful API, and refactor it to be a GraphQL API built with Apollo Server.
 
+The following User Story and Acceptance Criteria were provided for this challenge:
+
 > ## User Story
 >
 > ```md
